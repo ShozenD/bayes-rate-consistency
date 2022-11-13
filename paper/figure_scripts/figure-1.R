@@ -3,13 +3,13 @@ library(patchwork)
 library(ggplot2)
 library(zoo)
 library(ggpubr)
-source("~/Imperial/covimod-gp/R/covimod-utility.R")
+source("~/Imperial/bayes-rate-consistency/R/covimod-utility.R")
 
 theme_set(theme_bw())
 
 # COVIMOD
-covimod_survey <- load_covimod_data("~/Imperial/covimod-gp")
-covimod_data <- readRDS("~/Imperial/covimod-gp/data/COVIMOD/COVIMOD-single.rds")
+covimod_survey <- load_covimod_data("~/Imperial/bayes-rate-consistency")
+covimod_data <- readRDS("~/Imperial/bayes-rate-consistency/data/COVIMOD/COVIMOD-single.rds")
 
 # Sample size
 dt.part <- covimod_data$offsets
@@ -21,19 +21,18 @@ dt.dates <- dt.dates[, .(start_date = min(date), end_date = max(date)), by=.(wav
 dt.size <- merge(dt.part, dt.dates, by="wave")
 
 # COVID cases
-df.covid.cases <- readr::read_csv("~/Imperial/covimod-gp/data/time-series-covid19-confirmed-germany.csv")
+df.covid.cases <- readr::read_csv("~/Imperial/bayes-rate-consistency/data/covid19-confirmed-germany.csv")
 dt.covid.cases <- as.data.table(df.covid.cases)
 dt.covid.cases <- dt.covid.cases[date <= "2020-08-01"]
 
 # COVID deaths
-df.covid.deaths <- readr::read_csv("~/Imperial/covimod-gp/data/time-series-covid19-deaths-germany.csv")
+df.covid.deaths <- readr::read_csv("~/Imperial/bayes-rate-consistency/data/covid19-deaths-germany.csv")
 dt.covid.deaths <- as.data.table(df.covid.deaths)
 dt.covid.deaths <- dt.covid.deaths[date <= "2020-08-01"]
 
 # Stringency index
-df.covid.idx <- readr::read_csv("~/Imperial/covimod-gp/data/owid-covid-data.csv")
+df.covid.idx <- readr::read_csv("~/Imperial/bayes-rate-consistency/data/covid19-owid-germany.csv")
 dt.covid.idx <- as.data.table(df.covid.idx)
-dt.covid.idx <- dt.covid.idx[location == "Germany" & date <= "2020-08-01"]
 
 ##### Cumulative deaths #####
 p_death <- ggplot(dt.covid.deaths, aes(date, cum_deaths)) +
@@ -96,7 +95,7 @@ p_cases <- ggplot(dt.covid.cases, aes(x = date)) +
   )
 
 ##### Sample size #####
-covimod_data <- readRDS("~/Imperial/covimod-gp/data/COVIMOD/COVIMOD-multi.rds")
+covimod_data <- readRDS("~/Imperial/bayes-rate-consistency/data/COVIMOD/COVIMOD-multi.rds")
 dt.part <- covimod_data$offsets
 dt.N <- dt.part[, .(N = sum(N)), by=.(wave)]
 
@@ -134,7 +133,7 @@ design <- "
 patchwork <- p_cases + p_death + p_sample + plot_layout(design = design)
 patchwork + plot_annotation(tag_levels = "A") & theme(plot.tag = element_text(size = 10))
 
-ggsave("~/Imperial/covimod-gp/paper/figures/figure-1.jpeg",
+ggsave("~/Imperial/bayes-rate-consistency/paper/figures/figure-1.jpeg",
        units = "cm", width = 19, height = 12, dpi = 300)
 
 
